@@ -28,20 +28,42 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
 
   const validarFormulario = () => {
     let tempErrores = {};
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const soloLetrasRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const soloNumerosRegex = /^[0-9+\s-]+$/;
 
-    if (!cliente.firstname.trim()) tempErrores.firstname = "El nombre es obligatorio.";
-    if (!cliente.lastname.trim()) tempErrores.lastname = "El apellido es obligatorio.";
+    if (!cliente.firstname.trim()) {
+      tempErrores.firstname = "El nombre es obligatorio.";
+    } else if (!soloLetrasRegex.test(cliente.firstname)) {
+      tempErrores.firstname = "El formato ingresado no es válido. Solo se permiten letras.";
+    }
+
+    if (!cliente.lastname.trim()) {
+      tempErrores.lastname = "El apellido es obligatorio.";
+    } else if (!soloLetrasRegex.test(cliente.lastname)) {
+      tempErrores.lastname = "El formato ingresado no es válido. Solo se permiten letras.";
+    }
     
     if (!cliente.email.trim()) {
       tempErrores.email = "El correo es obligatorio.";
     } else if (!emailRegex.test(cliente.email)) {
-      tempErrores.email = "El formato de correo no es válido.";
+      tempErrores.email = "El formato ingresado no es válido.";
     }
 
-    if (!cliente.username.trim()) tempErrores.username = "El usuario es obligatorio.";
-    if (cliente.password.length < 4) tempErrores.password = "La contraseña debe tener al menos 4 caracteres.";
-    if (!cliente.phone.trim()) tempErrores.phone = "El teléfono es obligatorio.";
+    if (!cliente.username.trim()) {
+      tempErrores.username = "El usuario es obligatorio.";
+    }
+
+    if (cliente.password.length < 4) {
+      tempErrores.password = "La contraseña debe tener al menos 4 caracteres.";
+    }
+
+    if (!cliente.phone.trim()) {
+      tempErrores.phone = "El teléfono es obligatorio.";
+    } else if (!soloNumerosRegex.test(cliente.phone)) {
+      tempErrores.phone = "El formato ingresado no es válido. Solo se permiten números.";
+    }
 
     setErrores(tempErrores);
     return Object.keys(tempErrores).length === 0;
