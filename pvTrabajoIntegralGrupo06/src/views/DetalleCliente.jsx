@@ -28,7 +28,6 @@ const DetalleCliente = () => {
   const [abrirMensaje, setAbrirMensaje] = useState(false);
 
   const rolUsuario = admin?.sector;
-  1;
 
   const esSoporte = rolUsuario === "Soporte";
   const esGerencia = rolUsuario === "Gerencia";
@@ -66,14 +65,17 @@ const eliminarCliente = async () => {
         throw new Error("Error al intentar eliminar el cliente");
       }
 
-      setMensaje(
-        "Cliente eliminado correctamente. Operación simulada por la API.",
-      );
-      setAbrirMensaje(true);
+      const nombreEliminado =
+        cliente?.name?.lastname || cliente?.username || `ID ${id}`;
 
-      setTimeout(() => {
-        navigate("/clientes");
-      }, 1500);
+      navigate("/clientes", {
+        state: {
+          eliminado: {
+            id: Number(id),
+            nombre: nombreEliminado,
+          },
+        },
+      });
     } catch (err) {
       setMensaje("Error en la conexión al eliminar el cliente.");
       setAbrirMensaje(true);
