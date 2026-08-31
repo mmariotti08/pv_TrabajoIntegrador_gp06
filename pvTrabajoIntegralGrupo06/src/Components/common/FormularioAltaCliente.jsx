@@ -1,34 +1,35 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Snackbar, 
-  Alert, 
+import React, { useState } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Snackbar,
+  Alert,
   Grid,
-  CircularProgress
-} from '@mui/material';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+  CircularProgress,
+} from "@mui/material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import { crearCliente } from "../../services/clientesService";
 
 const FormularioAltaCliente = ({ onClienteCreado }) => {
   const [cliente, setCliente] = useState({
-    firstname: '',
-    lastname: '',
-    email: '',
-    username: '',
-    password: '',
-    phone: ''
+    firstname: "",
+    lastname: "",
+    email: "",
+    username: "",
+    password: "",
+    phone: "",
   });
 
   const [errores, setErrores] = useState({});
   const [cargando, setCargando] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertSeverity, setAlertSeverity] = useState('success'); 
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("success");
 
   const validarFormulario = () => {
-    let tempErrores = {};
-    
+    const tempErrores = {};
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const soloLetrasRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     const soloNumerosRegex = /^[0-9+\s-]+$/;
@@ -36,15 +37,17 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
     if (!cliente.firstname.trim()) {
       tempErrores.firstname = "El nombre es obligatorio.";
     } else if (!soloLetrasRegex.test(cliente.firstname)) {
-      tempErrores.firstname = "El formato ingresado no es válido. Solo se permiten letras.";
+      tempErrores.firstname =
+        "El formato ingresado no es válido. Solo se permiten letras.";
     }
 
     if (!cliente.lastname.trim()) {
       tempErrores.lastname = "El apellido es obligatorio.";
     } else if (!soloLetrasRegex.test(cliente.lastname)) {
-      tempErrores.lastname = "El formato ingresado no es válido. Solo se permiten letras.";
+      tempErrores.lastname =
+        "El formato ingresado no es válido. Solo se permiten letras.";
     }
-    
+
     if (!cliente.email.trim()) {
       tempErrores.email = "El correo es obligatorio.";
     } else if (!emailRegex.test(cliente.email)) {
@@ -56,29 +59,41 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
     }
 
     if (cliente.password.length < 4) {
-      tempErrores.password = "La contraseña debe tener al menos 4 caracteres.";
+      tempErrores.password =
+        "La contraseña debe tener al menos 4 caracteres.";
     }
 
     if (!cliente.phone.trim()) {
       tempErrores.phone = "El teléfono es obligatorio.";
     } else if (!soloNumerosRegex.test(cliente.phone)) {
-      tempErrores.phone = "El formato ingresado no es válido. Solo se permiten números.";
+      tempErrores.phone =
+        "El formato ingresado no es válido. Solo se permiten números.";
     }
 
     setErrores(tempErrores);
+
     return Object.keys(tempErrores).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCliente({ ...cliente, [name]: value });
+
+    setCliente({
+      ...cliente,
+      [name]: value,
+    });
+
     if (errores[name]) {
-      setErrores({ ...errores, [name]: '' });
+      setErrores({
+        ...errores,
+        [name]: "",
+      });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validarFormulario()) return;
 
     setCargando(true);
@@ -89,49 +104,54 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
       password: cliente.password,
       name: {
         firstname: cliente.firstname,
-        lastname: cliente.lastname
+        lastname: cliente.lastname,
       },
       address: {
-        city: 'San Salvador de Jujuy',
-        street: 'Av. Martiarena',
+        city: "San Salvador de Jujuy",
+        street: "Av. Martiarena",
         number: 1050,
-        zipcode: '4600',
-        geolocation: { lat: '-24.185', long: '-65.300' }
+        zipcode: "4600",
+        geolocation: {
+          lat: "-24.185",
+          long: "-65.300",
+        },
       },
-      phone: cliente.phone
+      phone: cliente.phone,
     };
 
-    try {
-      const response = await fetch('https://fakestoreapi.com/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosEstructurados)
-      });
+try {
+  const nuevoCliente = await crearCliente(datosEstructurados);
 
-      if (!response.ok) throw new Error('Error en la comunicación con el servidor.');
+  setAlertSeverity("success");
+  setAlertMessage(
+    `¡Cliente registrado con éxito! ID asignado: ${nuevoCliente.id}`
+  );
+  setOpenSnackbar(true);
 
-      const data = await response.json();
-      
-      setAlertSeverity('success');
-      setAlertMessage(`¡Cliente registrado con éxito! ID asignado por API: ${data.id}`);
-      setOpenSnackbar(true);
-
-      setTimeout(() => {
-        if (onClienteCreado) {
-          onClienteCreado({ ...datosEstructurados, id: data.id });
-        }
-        setCliente({ firstname: '', lastname: '', email: '', username: '', password: '', phone: '' });
-        setErrores({});
-      }, 1500);
-
-    } catch (error) {
-      setAlertSeverity('error');
-      setAlertMessage('Fallo en el servidor externo. No se pudo registrar.');
-      setOpenSnackbar(true);
-      console.error(error);
-    } finally {
-      setCargando(false);
+  setTimeout(() => {
+    if (onClienteCreado) {
+      onClienteCreado(nuevoCliente);
     }
+
+    setCliente({
+      firstname: "",
+      lastname: "",
+      email: "",
+      username: "",
+      password: "",
+      phone: "",
+    });
+
+    setErrores({});
+  }, 1500);
+} catch (error) {
+  setAlertSeverity("error");
+  setAlertMessage("Fallo en el servidor externo. No se pudo registrar.");
+  setOpenSnackbar(true);
+  console.error(error);
+} finally {
+  setCargando(false);
+}
   };
 
   return (
@@ -150,6 +170,7 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
             helperText={errores.firstname}
           />
         </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextField
             required
@@ -163,6 +184,7 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
             helperText={errores.lastname}
           />
         </Grid>
+
         <Grid item xs={12}>
           <TextField
             required
@@ -177,6 +199,7 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
             helperText={errores.email}
           />
         </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextField
             required
@@ -190,6 +213,7 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
             helperText={errores.username}
           />
         </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextField
             required
@@ -204,6 +228,7 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
             helperText={errores.password}
           />
         </Grid>
+
         <Grid item xs={12}>
           <TextField
             required
@@ -217,30 +242,49 @@ const FormularioAltaCliente = ({ onClienteCreado }) => {
             helperText={errores.phone}
           />
         </Grid>
+
         <Grid item xs={12}>
-          <Button 
-            type="submit" 
-            variant="contained" 
-            color="primary" 
-            fullWidth 
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
             size="large"
             disabled={cargando}
-            startIcon={cargando ? <CircularProgress size={20} color="inherit" /> : <PersonAddIcon />}
-            sx={{ py: 1.5, fontWeight: 'bold', textTransform: 'none', fontSize: '1rem' }}
+            startIcon={
+              cargando ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <PersonAddIcon />
+              )
+            }
+            sx={{
+              py: 1.5,
+              fontWeight: "bold",
+              textTransform: "none",
+              fontSize: "1rem",
+            }}
           >
-            {cargando ? 'Procesando alta...' : 'Registrar Cliente en Base de Datos'}
+            {cargando
+              ? "Procesando alta..."
+              : "Registrar Cliente en Base de Datos"}
           </Button>
         </Grid>
       </Grid>
 
-      <Snackbar 
-        open={openSnackbar} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
         onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
       >
-        <Alert onClose={() => setOpenSnackbar(false)} severity={alertSeverity} variant="filled" sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={alertSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
           {alertMessage}
         </Alert>
       </Snackbar>

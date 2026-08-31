@@ -1,27 +1,28 @@
-import { createContext, useState, useEffect } from 'react';
-
+import { createContext, useState, useEffect } from "react";
+import {
+  loginAdministrador,
+  obtenerSesionAdmin,
+  guardarSesionAdmin,
+  eliminarSesionAdmin,
+} from "../services/adminService";
 
 export const AdminContext = createContext();
 
 export const AdminProvider = ({ children }) => {
-  
-  const [admin, setAdmin] = useState(() => {
-    const savedAdmin = localStorage.getItem('admin_session');
-    return savedAdmin ? JSON.parse(savedAdmin) : null; 
-  });
+  const [admin, setAdmin] = useState(() => obtenerSesionAdmin());
 
-  
   useEffect(() => {
     if (admin) {
-      localStorage.setItem('admin_session', JSON.stringify(admin));
+      guardarSesionAdmin(admin);
     } else {
-      localStorage.removeItem('admin_session');
+      eliminarSesionAdmin();
     }
   }, [admin]);
 
-  
-  const loginAdmin = (adminData) => {
-    setAdmin(adminData);
+  const loginAdmin = async (usuario, password) => {
+    const adminValidado = await loginAdministrador(usuario, password);
+    setAdmin(adminValidado);
+    return adminValidado;
   };
 
   const logoutAdmin = () => {

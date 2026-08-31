@@ -1,21 +1,19 @@
-import { useContext } from 'react';
-import { AdminContext } from '../../context/AdminContext';
-import { Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Box, Chip } from '@mui/material';
-import LogoutIcon from '@mui/icons-material/Logout';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
+import { Link, useNavigate } from "react-router-dom";
+import { AppBar, Toolbar, Typography, Button, Box, Chip } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import { useAdmin } from "../../hooks/useAdmin";
 
 const Header = () => {
-  const { admin, logoutAdmin } = useContext(AdminContext);
+  const { admin, logoutAdmin } = useAdmin();
   const navigate = useNavigate();
-
 
   if (!admin) return null;
 
   const handleLogout = () => {
     logoutAdmin();
-    navigate('/login'); 
+    navigate("/login");
   };
 
   return (
@@ -25,41 +23,40 @@ const Header = () => {
           Panel de Control
         </Typography>
 
-        
-        <Box sx={{ flexGrow: 1, display: 'flex', gap: 2 }}>
-          <Button 
-            component={Link} 
-            to="/dashboard" 
-            color="inherit" 
+        <Box sx={{ flexGrow: 1, display: "flex", gap: 2 }}>
+          <Button
+            component={Link}
+            to="/dashboard"
+            color="inherit"
             startIcon={<DashboardIcon />}
           >
             Dashboard
           </Button>
-          <Button 
-            component={Link} 
-            to="/clientes" 
-            color="inherit" 
+
+          <Button
+            component={Link}
+            to="/clientes"
+            color="inherit"
             startIcon={<PeopleIcon />}
           >
             Clientes
           </Button>
         </Box>
-        
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Typography variant="body1">
             Bienvenido, <strong>{admin.nombre}</strong>
           </Typography>
-          
-          <Chip 
-            label={admin.sector} 
-            color={admin.sector === 'Gerencia' ? 'secondary' : 'default'} 
-            variant="filled" 
+
+          <Chip
+            label={admin.sector}
+            color={admin.sector === "Gerencia" ? "secondary" : "default"}
+            variant="filled"
           />
 
-          <Button 
-            variant="contained" 
-            color="error" 
+          <Button
+            variant="contained"
+            color="error"
             startIcon={<LogoutIcon />}
             onClick={handleLogout}
           >
